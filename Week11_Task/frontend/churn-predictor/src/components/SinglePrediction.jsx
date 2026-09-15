@@ -11,6 +11,9 @@ import {
   RefreshCw,
   Award,
   Zap,
+  Globe,
+  Activity,
+  Wallet,
 } from 'lucide-react';
 import { predictSingleCustomer } from '../services/api';
 
@@ -374,6 +377,7 @@ export default function SinglePrediction() {
         {result ? (
           <div className="result-container">
             {/* Churn Verdict Header */}
+            {/* Churn Verdict Header */}
             <div
               className={`verdict-banner ${
                 result.churn === 1 ? 'verdict-churn' : 'verdict-stay'
@@ -381,12 +385,12 @@ export default function SinglePrediction() {
             >
               <div className="verdict-icon-box">
                 {result.churn === 1 ? (
-                  <TrendingDown size={32} />
+                  <TrendingDown size={22} />
                 ) : (
-                  <TrendingUp size={32} />
+                  <TrendingUp size={22} />
                 )}
               </div>
-              <div>
+              <div className="verdict-text-wrap">
                 <span className="verdict-tag">
                   {result.churn === 1 ? 'CHURN RISK DETECTED' : 'LOYAL RETENTION'}
                 </span>
@@ -394,10 +398,17 @@ export default function SinglePrediction() {
               </div>
             </div>
 
-            {/* Risk Meter Gauge */}
+            {/* Risk Meter Gauge with Integrated Risk Classification */}
             <div className="metric-box">
               <div className="metric-header">
-                <span className="metric-title">Churn Probability</span>
+                <div className="metric-title-group">
+                  <span className="metric-title">Churn Probability</span>
+                  <span
+                    className={`risk-badge risk-${(result.risk_level || 'low').toLowerCase()}`}
+                  >
+                    {result.risk_level} Risk
+                  </span>
+                </div>
                 <span className="metric-value">
                   {result.probability_percent}%
                 </span>
@@ -421,62 +432,97 @@ export default function SinglePrediction() {
               </div>
             </div>
 
-            {/* Risk Level Badge */}
-            <div className="risk-level-row">
-              <span className="risk-label-text">Risk Classification:</span>
-              <span
-                className={`risk-badge risk-${(result.risk_level || 'low').toLowerCase()}`}
-              >
-                {result.risk_level} Risk
-              </span>
-            </div>
-
             {/* Retention Strategy Action Plan */}
             <div className="action-box">
-              <div className="action-title">
-                <Award size={18} />
-                <span>Recommended Retention Action</span>
-              </div>
-              {result.recommendation && result.recommendation.includes(': ') ? (
-                <div className="single-strategy-wrap">
-                  <div className="single-strategy-tag-row">
-                    <span
-                      className={`strategy-badge badge-${(
-                        result.risk_level || 'low'
-                      ).toLowerCase()}`}
-                    >
-                      {result.recommendation.split(': ')[0]}
-                    </span>
-                  </div>
-                  <p className="action-text">
-                    {result.recommendation.split(': ').slice(1).join(': ')}
-                  </p>
+              <div className="action-header-row">
+                <div className="action-title">
+                  <Award size={15} />
+                  <span>Retention Action</span>
                 </div>
-              ) : (
-                <p className="action-text">
-                  {result.recommendation ||
+                {result.recommendation && result.recommendation.includes(': ') && (
+                  <span
+                    className={`strategy-status-badge badge-${(
+                      result.risk_level || 'low'
+                    ).toLowerCase()}`}
+                  >
+                    <span className="pulse-dot"></span>
+                    <span>
+                      {(() => {
+                        const level = (result.risk_level || '').toLowerCase();
+                        if (level === 'high') return 'Immediate Action';
+                        if (level === 'medium') return 'Moderate Risk';
+                        return 'Healthy Customer';
+                      })()}
+                    </span>
+                  </span>
+                )}
+              </div>
+              <p className="action-text">
+                {result.recommendation && result.recommendation.includes(': ')
+                  ? result.recommendation.split(': ').slice(1).join(': ')
+                  : result.recommendation ||
                     'Engage proactively with personalized rewards and check-in calls.'}
-                </p>
-              )}
+              </p>
             </div>
 
-            {/* Profile Factor Breakdown */}
-            <div className="factors-box">
-              <h4 className="factors-title">Key Profile Drivers</h4>
-              <ul className="factors-list">
-                <li>
-                  <strong>Geography & Age:</strong> {formData.country} resident, {formData.age} years old
-                </li>
-                <li>
-                  <strong>Banking Activity:</strong>{' '}
-                  {formData.active_member === 1 ? 'Active relationship' : 'Inactive customer'}{' '}
-                  with {formData.products_number}{' '}
-                  {formData.products_number === 1 ? 'product' : 'products'}
-                </li>
-                <li>
-                  <strong>Capital Stored:</strong> ${formData.balance.toLocaleString()} across accounts
-                </li>
-              </ul>
+            {/* Key Profile Drivers - Compact & Simple */}
+            <div className="factors-box compact">
+              <div className="factors-header">
+                <div className="factors-title-wrap">
+                  <Sparkles size={13} className="factors-header-icon" />
+                  <h4 className="factors-title">Key Profile Drivers</h4>
+                </div>
+                <span className="factors-subtitle">Model Context</span>
+              </div>
+
+              <div className="drivers-compact-list">
+                {/* Driver 1: Geography & Demographics */}
+                <div className="driver-compact-row">
+                  <div className="driver-compact-left">
+                    <div className="driver-icon-pill icon-blue">
+                      <Globe size={13} />
+                    </div>
+                    <span className="driver-compact-label">Geography & Age</span>
+                  </div>
+                  <div className="driver-compact-val">
+                    <span>{formData.country} resident</span>
+                    <span className="driver-dot">•</span>
+                    <span>{formData.age} yrs</span>
+                  </div>
+                </div>
+
+                {/* Driver 2: Banking Engagement */}
+                <div className="driver-compact-row">
+                  <div className="driver-compact-left">
+                    <div className={`driver-icon-pill ${formData.active_member === 1 ? 'icon-green' : 'icon-amber'}`}>
+                      <Activity size={13} />
+                    </div>
+                    <span className="driver-compact-label">Banking Activity</span>
+                  </div>
+                  <div className="driver-compact-val">
+                    <span className={`status-indicator-pill ${formData.active_member === 1 ? 'status-active' : 'status-inactive'}`}>
+                      {formData.active_member === 1 ? 'Active Member' : 'Inactive'}
+                    </span>
+                    <span className="driver-dot">•</span>
+                    <span>{formData.products_number} {formData.products_number === 1 ? 'product' : 'products'}</span>
+                  </div>
+                </div>
+
+                {/* Driver 3: Capital & Liquidity */}
+                <div className="driver-compact-row">
+                  <div className="driver-compact-left">
+                    <div className="driver-icon-pill icon-emerald">
+                      <Wallet size={13} />
+                    </div>
+                    <span className="driver-compact-label">Capital Stored</span>
+                  </div>
+                  <div className="driver-compact-val font-mono">
+                    <span className="driver-highlight">${Number(formData.balance).toLocaleString()}</span>
+                    <span className="driver-dot">•</span>
+                    <span className="driver-subtext">Credit: {formData.credit_score}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
